@@ -19,8 +19,8 @@ class MapTile:
 
 class StartTile(MapTile):
     def intro_text(self):
-        return '''You find yourself in a cave with a flickering torch on the wall. 
-        You can make out four paths, each equally as dark and foreboding.'''
+        return 'You find yourself in a cave with a flickering torch on the wall. \n' \
+               'You can make out four paths, each equally as dark and foreboding.\n'
 
     def modify_player(self, player):
         # This room has no action on the player.
@@ -32,8 +32,8 @@ class EnemyTile(MapTile):
         r = random.random()
         if r < 0.50:
             self.enemy = enemies.GiantSpider()
-            self.alive_text = '''A giant spider jumps down from its web in front of you!'''
-            self.dead_text = '''The corpse of a dead spider rots on the ground.'''
+            self.alive_text = 'A giant spider jumps down from its web in front of you!'
+            self.dead_text = 'The corpse of a dead spider rots on the ground.'
         elif r < 0.80:
             self.enemy = enemies.Ogre()
             self.alive_text = "An ogre is blocking your path!"
@@ -41,7 +41,7 @@ class EnemyTile(MapTile):
         elif r < 0.95:
             self.enemy = enemies.BatColony()
             self.alive_text = "You hear a squeaking noise growing louder" \
-                              "...suddenly you are lost in s swarm of bats!"
+                              "...suddenly you are lost in a swarm of bats!"
             self.dead_text = "Dozens of dead bats are scattered on the ground."
         else:
             self.enemy = enemies.RockMonster()
@@ -105,11 +105,9 @@ class LootTile(MapTile):
         r = random.random()
         if r < 0.70:
             self.item = items.Dagger()
-            self.itemtext = '''
-            You enter the cave. 
-            You\'re about to pass when you see a dagger on the floor. 
-            It looks like it\'s been lying there forever.
-            '''
+            self.itemtext = 'You enter the cave.\n' \
+                            'You\'re about to pass when you see a dagger on the floor.\n' \
+                            'It looks like it\'s been lying there forever.'
         else:
             self.item = items.RustySword()
             self.itemtext = '''
@@ -185,8 +183,6 @@ class TraderTile(MapTile):
         '''
 
 
-starting = False
-victory = False
 tilenames = {
     'ST': StartTile,
     'VT': VictoryTile,
@@ -196,10 +192,13 @@ tilenames = {
     'FL': LootTile,
     '  ': None
 }
+world_map = []
+starting = False
+victory = False
+starting_position = (0, 0)
 
 
 def generateworld():
-    world = []
     while True:
         try:
             size = int(input('What size should the map be? Please give a number between 5 and 25.\n'))
@@ -209,16 +208,28 @@ def generateworld():
                 print('I said, between 5 and 25. ')
         except ValueError:
             print('Please give me a size. An integer, if you please')
-    for i in range(size):
-        row = []
-        for j in range(size):
-            row.append(randomizetile(size))
-        world.append(row)
-        print(row)
-    return world
+    while True:
+        global starting
+        global victory
+        global world_map
+        world_map = []
+        starting = False
+        victory = False
+        for y in range(size):
+            row = []
+            for x in range(size):
+                tile = randomizetile(size, x, y)
+                row.append(tile)
+            world_map.append(row)
+            print(row)
+        print('')
+        starting_node = tile_at(starting_position[0], starting_position[1])
+        print(starting_node)
+        if bfs(starting_node) > size:
+            break
 
 
-def randomizetile(size):
+def randomizetile(size, x, y):
     r = random.random()
     global starting
     global victory
@@ -226,41 +237,23 @@ def randomizetile(size):
     if not starting:
         if r < 1 - (0.01 ** (1 / mapsize)):
             starting = True
-            return 'ST'
+            global starting_position
+            starting_position = (x, y)
+            return StartTile(x, y)
     if not victory:
         if r > 0.01 ** (1 / mapsize):
             victory = True
-            return 'VT'
-    if r < 0.15:
-        return 'FL'
+            return VictoryTile(x, y)
+    if r < 0.10:
+        return LootTile(x, y)
     elif r < 0.45:
-        return 'EN'
+        return EnemyTile(x, y)
     elif r < 0.65:
-        return '  '
+        return None
     elif r < 0.90:
-        return 'FG'
+        return FindGoldTile(x, y)
     else:
-        return 'TT'
-
-
-world_map = []
-starting_position = (0, 0)
-
-def parsetiles():
-    while True:
-        world = generateworld()
-        for y, r in enumerate(world):
-            row = []
-            for x, cell in enumerate(r):
-                tile_name = tilenames[cell]
-                if tile_name == StartTile:
-                    global starting_position
-                    starting_position = (x, y)
-                row.append(tile_name(x, y) if tile_name else None)
-            world_map.append(row)
-        starting_node = tile_at(starting_position[0], starting_position[1])
-        if bfs(starting_node):
-            break
+        return TraderTile(x, y)
 
 
 def findadjacenttiles(x, y):
@@ -274,25 +267,16 @@ def findadjacenttiles(x, y):
 
 
 def bfs(start):
-    queue = [start]
+    queue = [(start, [start])]
     visited = set()
     while queue:
-        node = queue.pop(0)
+        node, path = queue.pop(0)
         for connection in findadjacenttiles(node.x, node.y) - visited:
             visited.add(connection)
-            queue.append(connection)
+            queue.append((connection, path + [connection]))
             if isinstance(connection, VictoryTile):
-                return True
-    return False
-
-
-def strtile_at(x, y, world):
-    if x < 0 or y < 0:
-        return None
-    try:
-        return world[y][x]
-    except IndexError:
-        return None
+                return len(path + [connection])
+    return 0
 
 
 def tile_at(x, y):

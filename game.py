@@ -3,7 +3,7 @@ from player import Player
 
 
 def play():
-    world.parsetiles()
+    world.generateworld()
     player = Player()
     while player.is_alive() and not player.victory:
         room = world.tile_at(player.x, player.y)
@@ -12,14 +12,12 @@ def play():
         if player.is_alive() and not player.victory:
             choose_action(room, player)
         elif not player.is_alive():
-            print('''
-            What an unfortunate series of events.
-            You were so close.
-            Yet all things must come to an end.
-            
-            Hey!
-            How about trying this game again?
-            ''')
+            print('\n\nWhat an unfortunate series of events.\n'
+                  'You were so close.\n'
+                  'Yet all things must come to an end.\n\n'
+                  'Hey!\n'
+                  'How about trying this game again?'
+                  )
 
 
 def choose_action(room, player):
