@@ -1,0 +1,8 @@
+|  |  |  |FG|EN|EN|
+|FG|EN|EN|EN|  |EN|
+|TT|  |  |VT|  |FG|
+|FG|EN|  |  |  |FL|
+|EN|  |  |FL|  |EN|
+|FL|EN|  |EN|  |TT|
+|  |FG|EN|FG|ST|FG|
+|TT|EN|  |  |  |  |
