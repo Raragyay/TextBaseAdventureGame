@@ -185,6 +185,8 @@ class TraderTile(MapTile):
         '''
 
 
+starting = False
+victory = False
 tilenames = {
     'ST': StartTile,
     'VT': VictoryTile,
@@ -194,28 +196,103 @@ tilenames = {
     'FL': LootTile,
     '  ': None
 }
-world_map = []
 
-starting_position = None
+
+def generateworld():
+    world = []
+    while True:
+        try:
+            size = int(input('What size should the map be? Please give a number between 5 and 25.\n'))
+            if 5 <= size <= 25:
+                break
+            else:
+                print('I said, between 5 and 25. ')
+        except ValueError:
+            print('Please give me a size. An integer, if you please')
+    for i in range(size):
+        row = []
+        for j in range(size):
+            row.append(randomizetile(size))
+        world.append(row)
+        print(row)
+    return world
+
+
+def randomizetile(size):
+    r = random.random()
+    global starting
+    global victory
+    mapsize = size ** 2
+    if not starting:
+        if r < 1 - (0.01 ** (1 / mapsize)):
+            starting = True
+            return 'ST'
+    if not victory:
+        if r > 0.01 ** (1 / mapsize):
+            victory = True
+            return 'VT'
+    if r < 0.15:
+        return 'FL'
+    elif r < 0.45:
+        return 'EN'
+    elif r < 0.65:
+        return '  '
+    elif r < 0.90:
+        return 'FG'
+    else:
+        return 'TT'
+
+
+world_map = []
 
 
 def parsetiles():
-    with open('resources/map.txt', 'r') as f:
-        dsl_rows = f.readlines()
-    dsl_rows = [x for x in dsl_rows if x]
-    print(dsl_rows)
-    for y, r in enumerate(dsl_rows):
-        row = []
-        dsl_row = r.split('|')
-        dsl_row = [c for c in dsl_row if c and c is not '\n']
-        print(dsl_row)
-        for x, cell in enumerate(dsl_row):
-            tile_name = tilenames[cell]
-            if tile_name == StartTile:
-                global starting_position
-                starting_position = (x, y)
-            row.append(tile_name(x, y) if tile_name else None)
-        world_map.append(row)
+    while True:
+        world = generateworld()
+        for y, r in enumerate(world):
+            row = []
+            for x, cell in enumerate(r):
+                tile_name = tilenames[cell]
+                if tile_name == StartTile:
+                    global starting_position
+                    starting_position = (x, y)
+                row.append(tile_name(x, y) if tile_name else None)
+            world_map.append(row)
+        starting_node = tile_at(starting_position[0], starting_position[1])
+        if bfs(starting_node):
+            break
+
+
+def findadjacenttiles(x, y):
+    arr = set()
+    arr.add(tile_at(x + 1, y))
+    arr.add(tile_at(x - 1, y))
+    arr.add(tile_at(x, y - 1))
+    arr.add(tile_at(x, y + 1))
+    arr = {i for i in arr if i}
+    return arr
+
+
+def bfs(start):
+    queue = [start]
+    visited = set()
+    while queue:
+        node = queue.pop(0)
+        for connection in findadjacenttiles(node.x, node.y) - visited:
+            visited.add(connection)
+            queue.append(connection)
+            if isinstance(connection, VictoryTile):
+                return True
+    return False
+
+
+def strtile_at(x, y, world):
+    if x < 0 or y < 0:
+        return None
+    try:
+        return world[y][x]
+    except IndexError:
+        return None
 
 
 def tile_at(x, y):
