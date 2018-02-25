@@ -244,7 +244,7 @@ def randomizetile(size):
 
 
 world_map = []
-
+starting_position = (0, 0)
 
 def parsetiles():
     while True:

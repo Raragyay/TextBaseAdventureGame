@@ -8,7 +8,6 @@ class Weapon:
 
 class Rock(Weapon):
     def __init__(self):
-        super().__init__()
         self.name = 'Rock'
         self.description = 'A fist-sized rock, suitable for bludgeoning.'
         self.value = 0
@@ -17,7 +16,6 @@ class Rock(Weapon):
 
 class Dagger(Weapon):
     def __init__(self):
-        super().__init__()
         self.name = 'Dagger'
         self.description = 'A small dagger with some rust. Somewhat more dangerous than a rock.'
         self.value = 10
@@ -26,7 +24,6 @@ class Dagger(Weapon):
 
 class RustySword(Weapon):
     def __init__(self):
-        super().__init__()
         self.name = 'Rusty Sword'
         self.description = 'A sword you found stuck in a rock. Who knows? Maybe it\'s still sharp.'
         self.value = 100
@@ -43,7 +40,6 @@ class Consumable:
 
 class CrustyBread(Consumable):
     def __init__(self):
-        super().__init__()
         self.name = 'Crusty Bread'
         self.healing_value = 10
         self.value = 12
@@ -51,7 +47,6 @@ class CrustyBread(Consumable):
 
 class HealingPotion(Consumable):
     def __init__(self):
-        super().__init__()
         self.name = 'Healing Potion'
         self.healing_value = 50
         self.value = 60

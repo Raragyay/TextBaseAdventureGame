@@ -11,7 +11,6 @@ class NonPlayableCharacter:
 
 class Trader(NonPlayableCharacter):
     def __init__(self):
-        super().__init__()
         self.name = 'Trader'
         self.gold = 100
         self.inventory = [
