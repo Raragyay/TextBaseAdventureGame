@@ -1,3 +1,5 @@
+import os
+
 import world
 from player import Player
 
@@ -18,6 +20,8 @@ def play():
                   'Hey!\n'
                   'How about trying this game again?'
                   )
+        print('\n' * 100)
+        world.printworld()
 
 
 def choose_action(room, player):
@@ -52,6 +56,7 @@ def get_available_actions(room, player):
             action_adder(actions, 'a', player.move_west, 'Go West')
     if player.hp < 100:
         action_adder(actions, 'h', player.heal, 'Heal')
+    action_adder(actions, 'm', world.printworld, 'Print Map')
     return actions
 
 

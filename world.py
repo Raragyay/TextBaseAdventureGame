@@ -20,7 +20,7 @@ class MapTile:
 class StartTile(MapTile):
     def intro_text(self):
         return 'You find yourself in a cave with a flickering torch on the wall. \n' \
-               'You can make out four paths, each equally as dark and foreboding.\n'
+               'You can make out several paths, each equally as dark and foreboding.\n'
 
     def modify_player(self, player):
         # This room has no action on the player.
@@ -173,7 +173,7 @@ class TraderTile(MapTile):
                     choice = int(ui)
                     to_swap = seller.inventory[choice - 1]
                     swap(seller, buyer, to_swap)
-                except ValueError:
+                except(ValueError, IndexError):
                     print('Invalid choice!')
 
     def intro_text(self):
@@ -184,13 +184,13 @@ class TraderTile(MapTile):
 
 
 tilenames = {
-    'ST': StartTile,
-    'VT': VictoryTile,
-    'FG': FindGoldTile,
-    'EN': EnemyTile,
-    'TT': TraderTile,
-    'FL': LootTile,
-    '  ': None
+    'StartTile': 'ST',
+    'VictoryTile': 'VT',
+    'FindGoldTile': 'FG',
+    'EnemyTile': 'EN',
+    'TraderTile': 'TT',
+    'LootTile': 'FL',
+    'NoneType': '  '
 }
 world_map = []
 starting = False
@@ -201,11 +201,11 @@ starting_position = (0, 0)
 def generateworld():
     while True:
         try:
-            size = int(input('What size should the map be? Please give a number between 5 and 25.\n'))
-            if 5 <= size <= 25:
+            size = int(input('What size should the map be? Please give a number between 5 and 100.\n'))
+            if 5 <= size <= 100:
                 break
             else:
-                print('I said, between 5 and 25. ')
+                print('I said, between 5 and 100. ')
         except ValueError:
             print('Please give me a size. An integer, if you please')
     while True:
@@ -221,12 +221,14 @@ def generateworld():
                 tile = randomizetile(size, x, y)
                 row.append(tile)
             world_map.append(row)
-            print(row)
-        print('')
+        print('Map Generated.')
         starting_node = tile_at(starting_position[0], starting_position[1])
         print(starting_node)
         if bfs(starting_node) > size:
+            print('Generation passes tests.')
             break
+        print('Generation does not meet requirements. Generating again.')
+    printworld()
 
 
 def randomizetile(size, x, y):
@@ -277,6 +279,12 @@ def bfs(start):
             if isinstance(connection, VictoryTile):
                 return len(path + [connection])
     return 0
+
+
+def printworld():
+    global world_map
+    for row in world_map:
+        print('|' + '|'.join(tilenames[type(i).__name__] for i in row) + '|')
 
 
 def tile_at(x, y):
